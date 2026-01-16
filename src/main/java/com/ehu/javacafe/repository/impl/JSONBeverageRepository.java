@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -13,20 +14,17 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
+@Repository
+@Primary
 public class JSONBeverageRepository implements BeverageRepository {
+
     private static final Logger logger = LoggerFactory.getLogger(JSONBeverageRepository.class);
     private static final String BEVERAGES_FILE = "beverages.json";
+
     private final List<Beverage> beverages;
-    private final static JSONBeverageRepository instance = new JSONBeverageRepository();
 
-    private JSONBeverageRepository() {
+    public JSONBeverageRepository() {
         this.beverages = loadBeveragesFromJson();
-    }
-
-    public static JSONBeverageRepository getInstance() {
-        return instance;
     }
 
     private List<Beverage> loadBeveragesFromJson() {
@@ -36,7 +34,7 @@ public class JSONBeverageRepository implements BeverageRepository {
                 logger.error("Could not find {} in resources", BEVERAGES_FILE);
                 throw new RuntimeException("Could not find " + BEVERAGES_FILE + " in resources");
             }
-            List<Beverage> loadedBeverages = new ArrayList<>(objectMapper.readValue(inputStream, new TypeReference<List<Beverage>>() {}));
+            List<Beverage> loadedBeverages = objectMapper.readValue(inputStream, new TypeReference<List<Beverage>>() {});
             logger.info("Successfully loaded {} beverages from JSON file", loadedBeverages.size());
             return loadedBeverages;
         } catch (IOException e) {
@@ -46,8 +44,6 @@ public class JSONBeverageRepository implements BeverageRepository {
 
     @Override
     public List<Beverage> getAllBeverages() {
-        logger.info("Fetching all beverages from JSON repository");
-        logger.debug("Total beverages available: {}", beverages.size());
         return beverages;
     }
 
@@ -61,15 +57,12 @@ public class JSONBeverageRepository implements BeverageRepository {
         Beverage beverageToDelete = getBeverageById(id);
         if (beverageToDelete != null) {
             beverages.remove(beverageToDelete);
-        } else {
-            logger.warn("Beverage with ID {} not found, cannot delete", id);
         }
         return beverageToDelete;
     }
 
     @Override
     public Beverage getBeverageById(long id) {
-        logger.debug("Fetching beverage by ID: {}", id);
         return beverages.stream()
                 .filter(b -> b.getId() == id)
                 .findFirst()

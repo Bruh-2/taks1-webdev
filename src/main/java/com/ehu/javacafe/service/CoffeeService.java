@@ -4,7 +4,6 @@ import com.ehu.javacafe.entity.Beverage;
 import com.ehu.javacafe.repository.BeverageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +13,9 @@ public class CoffeeService {
     private static final Logger logger = LoggerFactory.getLogger(CoffeeService.class);
     private final BeverageRepository beverageRepository;
 
+    public CoffeeService(BeverageRepository beverageRepository) {
+        this.beverageRepository = beverageRepository;
+    }
 
 
     public Beverage getBeverageById(long id) {
